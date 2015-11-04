@@ -1,0 +1,44 @@
+{
+  "name": "pipboy",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "test": "grunt build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/padsbanger/pipboy.git"
+  },
+  "keywords": [
+    "Grunt",
+    "Angular.js"
+  ],
+  "author": "Michal Lach",
+  "license": "MIT",
+  "devDependencies": {
+    "grunt-concurrent": "^1.0.0",
+    "grunt-cli": "^0.1.13",
+    "less": "^2.5.0",
+    "grunt-mkdir": "^0.1.2",
+    "grunt-contrib-concat": "^0.5.1",
+    "grunt-contrib-connect": "^0.10.1",
+    "load-grunt-tasks": "^3.1.0",
+    "grunt-newer": "^1.1.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-contrib-less": "^1.0.0",
+    "grunt-contrib-uglify": "^0.8.1",
+    "grunt-contrib-clean": "^0.6.0",
+    "time-grunt": "^1.1.0",
+    "grunt-karma": "^0.10.1",
+    "karma": "^0.12.31",
+    "karma-script-launcher": "^0.1.0",
+    "jasmine-reporters": "^2.0.5",
+    "karma-junit-reporter": "^0.2.2",
+    "grunt-contrib-copy": "^0.8.0",
+    "jasmine-core": "^2.2.0",
+    "karma-jasmine": "^0.3.5",
+    "matchdep": "^0.3.0",
+    "karma-phantomjs-launcher": "^0.1.4"
+  }
+}
