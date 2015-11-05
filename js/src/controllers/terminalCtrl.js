@@ -6,17 +6,11 @@ pipboy.controller('terminalCtrl', ['$scope', 'CommandService', function($scope, 
   $scope.commandToType = '';
   $scope.commands = '';
 
-  CommandService.sendCommand('ls', '0').then(function(data){
-    // angular.copy(data.data.items, $scope.commands)
-    $scope.commands = data.data.items
-  })
+  // CommandService.sendCommand('ls', '0').then(function(data){
+  //   $scope.commands = data.data.items
+  // })
 
 
-  function splitCommand(commandString) {
-    var command = commandString.split(" ")
-
-    return command;
-  }
 
   $scope.execute = function(commandToType) {
 
@@ -33,13 +27,6 @@ pipboy.controller('terminalCtrl', ['$scope', 'CommandService', function($scope, 
       }
       console.log($scope.commands[prop])
     }
-
-
-    CommandService.sendCommand(command, target).then(function(data){
-      // angular.copy(data.data.items, $scope.commands)
-      $scope.commands = data.data.items
-    })
-
 
   }
 }]);

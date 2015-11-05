@@ -11,21 +11,10 @@
 </head>
 
 <body ng-controller="terminalCtrl">
-  <img src="img/bg.jpg">
+  <!-- <img src="img/bg.jpg"> -->
   <div id="pipboy">
-  <span ng-repeat="command in commands">
-    {{::command.name}}
-  </span>
-  <div>
-    {{::commandToType}}
-  </div>
   <div class="terminalInput">
-    <span class="logo">[~]</span>
-    <span class="user">$</span>
-    <form name="terminal" ng-submit="execute(commandToType)">
-       <input type="text" ng-model="commandToType" palceholder="For list of avaiable commands type help"  autofocus required />
-    </form>
-
+    <terminal></terminal>
   </div>
 
   </div>

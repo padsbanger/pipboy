@@ -1,6 +1,5 @@
 @import (inline) 'normalize.css';
 @import 'vars.less';
-
 body {
   font-size: 16px;
   line-height: 24px;
@@ -20,26 +19,23 @@ body {
     color: @terminal-green;
     margin: 2px 0;
   }
-  .logo {
+  .terminal-logo {
     color: @nuka-cola;
   }
-  .user {
+  .terminal-user {
     color: @violent-red;
   }
-  .user .logo {
+  .terminal-user .terminal-logo {
     margin: 0;
     padding: 0;
   }
-  form {
-    display: inline-block;
-    input {
-      color: @terminal-green;
-      background: none;
+  input {
+    color: @terminal-green;
+    background: none;
+    border: none;
+    &:focus {
+      outline: none;
       border: none;
-      &:focus {
-        outline: none;
-        border: none;
-      }
     }
   }
 }
