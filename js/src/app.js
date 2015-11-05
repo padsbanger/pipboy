@@ -1,0 +1,1 @@
+var pipboy = angular.module('pipboy', []);

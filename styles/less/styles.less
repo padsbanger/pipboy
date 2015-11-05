@@ -1,7 +1,45 @@
+@import (inline) 'normalize.css';
 @import 'vars.less';
 
 body {
   font-size: 16px;
+  line-height: 24px;
   font-family: @font-family;
   font-weight: bold;
+  color: @terminal-green;
+}
+
+#pipboy {
+  overflow: auto;
+  width: 800px;
+  height: 500px;
+  position: absolute;
+  top: 200px;
+  left: 700px;
+  p {
+    color: @terminal-green;
+    margin: 2px 0;
+  }
+  .logo {
+    color: @nuka-cola;
+  }
+  .user {
+    color: @violent-red;
+  }
+  .user .logo {
+    margin: 0;
+    padding: 0;
+  }
+  form {
+    display: inline-block;
+    input {
+      color: @terminal-green;
+      background: none;
+      border: none;
+      &:focus {
+        outline: none;
+        border: none;
+      }
+    }
+  }
 }

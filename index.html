@@ -10,14 +10,24 @@
   <link rel="stylesheet" href="styles/css/styles.css">
 </head>
 
-<body>
-  <div class="container" ng-controller="mainController">
-  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-  tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-  quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-  consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-  cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-  proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+<body ng-controller="terminalCtrl">
+  <img src="img/bg.jpg">
+  <div id="pipboy">
+  <span ng-repeat="command in commands">
+    {{::command.name}}
+  </span>
+  <div>
+    {{::commandToType}}
+  </div>
+  <div class="terminalInput">
+    <span class="logo">[~]</span>
+    <span class="user">$</span>
+    <form name="terminal" ng-submit="execute(commandToType)">
+       <input type="text" ng-model="commandToType" palceholder="For list of avaiable commands type help"  autofocus required />
+    </form>
+
+  </div>
+
   </div>
   <script src="js/build/libs.js"></script>
   <script src="js/src/app.js"></script>

@@ -97,8 +97,7 @@ module.exports = function(grunt) {
       },
       libs: {
         src: [
-          'libs/angular/angular.js',
-          'libs/angular-route/angular-route.js'
+          'libs/angular.min.js',
         ],
         dest: 'js/build/libs.js'
       },
