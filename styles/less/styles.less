@@ -16,6 +16,7 @@ body {
   top: 200px;
   left: 600px;
   padding-right: 20px;
+
   p {
     color: @terminal-green;
     margin: 2px 0;
@@ -26,10 +27,6 @@ body {
   .terminal-user {
     color: @violent-red;
   }
-  .terminal-user .terminal-logo {
-    margin: 0;
-    padding: 0;
-  }
   input {
     color: @terminal-green;
     background: none;
@@ -38,5 +35,26 @@ body {
       outline: none;
       border: none;
     }
+  }
+}
+
+
+.css-typing {
+  width: 500px;
+  white-space: nowrap;
+  overflow: hidden;
+  -webkit-animation: type 2s steps(50, end);
+  animation: type 2s steps(50, end);
+}
+
+@keyframes type {
+  from {
+    width: 0;
+  }
+}
+
+@-webkit-keyframes type {
+  from {
+    width: 0;
   }
 }

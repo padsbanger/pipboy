@@ -17,7 +17,6 @@ pipboy.directive('terminal', function(CommandService) {
 
 
           var terminalWindow = element;
-          console.log(element)
           var input = angular.element(terminalWindow[0].querySelector('input[type="text"]'))
           var results = angular.element(terminalWindow[0].querySelector('.terminal-results'))
 
@@ -65,29 +64,35 @@ pipboy.directive('terminal', function(CommandService) {
           function start() {
             var element = document.createElement('pre')
             element.innerHTML = 'Welcome to your very own Pip-Boy 3000 ! <br/>Type `help` to see avaiable commands.  <br/>Use arrow keys to toggle between already inputed commands.';
+            // console.log(element)
+            element.className = 'css-typing';
             results[0].appendChild(element)
+
           }
 
           function handleDefault() {
             var element = document.createElement('pre')
             element.innerHTML = 'Unrecognized input. Type `help` to see all commands.';
+            element.className = 'css-typing';
             results[0].appendChild(element)
           }
 
           function handleHelp() {
             var element = document.createElement('pre')
             element.innerHTML = 'help clear ls cat cd';
+            element.className = 'css-typing';
             results[0].appendChild(element)
           }
 
           function handleLol() {
             var element = document.createElement('pre')
             element.innerHTML = '( ͡° ͜ʖ ͡°)';
+            element.className = 'css-typing';
             results[0].appendChild(element)
           }
 
           function handleCat(param) {
-            var element = document.createElement('p')
+            var element = document.createElement('pre')
             for (var prop in currentDirList) {
               if (param === currentDirList[prop].name && currentDirList[prop].type === 'file') {
                 CommandService.sendCommand('cat', prop).then(function(data) {
@@ -108,6 +113,7 @@ pipboy.directive('terminal', function(CommandService) {
             if (!param) {
               for (var prop in currentDirList) {
                 element.innerHTML += currentDirList[prop].name + ' ';
+                element.className = 'css-typing';
                 results[0].appendChild(element)
               }
             } else {
@@ -123,6 +129,7 @@ pipboy.directive('terminal', function(CommandService) {
 
                   }, function errorCallback(data) {
                     element.innerHTML = data.data;
+                    element.className = 'css-typing';
                     results[0].appendChild(element);
                   });
                 }
@@ -203,6 +210,7 @@ pipboy.directive('terminal', function(CommandService) {
               var commandTyped = document.createElement('pre');
 
               commandTyped.innerHTML = scope.commandLine;
+              commandTyped.className = 'css-typing';
               results[0].appendChild(commandTyped)
 
               commandHanlder(commandObj.command, commandObj.param)
