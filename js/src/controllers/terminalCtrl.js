@@ -6,11 +6,6 @@ pipboy.controller('terminalCtrl', ['$scope', 'CommandService', function($scope, 
   $scope.commandToType = '';
   $scope.commands = '';
 
-  // CommandService.sendCommand('ls', '0').then(function(data){
-  //   $scope.commands = data.data.items
-  // })
-
-
 
   $scope.execute = function(commandToType) {
 

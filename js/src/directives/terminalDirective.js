@@ -11,35 +11,151 @@ pipboy.directive('terminal', function(CommandService) {
         pre: function preLink() {},
         post: function postLink(scope, element, attrs, controller) {
 
+          scope.prompt = '[~]$'
+          scope.currentDirName = '~/home'
+          scope.currentDirIndex = 0
+
+
           var terminalWindow = element;
+          console.log(element)
           var input = angular.element(terminalWindow[0].querySelector('input[type="text"]'))
           var results = angular.element(terminalWindow[0].querySelector('.terminal-results'))
 
           var commandHistory = [];
           var commandIndex = -1;
+          var currentDirList = {};
+
+          CommandService.sendCommand('ls', scope.currentDirIndex).then(function(data) {
+            currentDirList = data.data.items
+            start();
+          });
 
           function commandHanlder(command, param) {
 
-            switch (command.toLowerString()) {
+            switch (command) {
               case 'help':
+                handleHelp();
                 break;
 
               case 'clear':
+                handleClear();
                 break;
 
               case 'ls':
+                handleList(param);
                 break;
 
               case 'cat':
+                handleCat(param);
                 break;
 
-              case 'cd ..':
+              case 'lol':
+                handleLol();
+                break;
+
+              case 'cd':
+                handleCd(param);
                 break;
 
               default:
-                console.log('unrecognized input')
+                handleDefault();
+            }
+          }
+
+          function start() {
+            var element = document.createElement('pre')
+            element.innerHTML = 'Welcome to your very own Pip-Boy 3000 ! <br/>Type `help` to see avaiable commands.  <br/>Use arrow keys to toggle between already inputed commands.';
+            results[0].appendChild(element)
+          }
+
+          function handleDefault() {
+            var element = document.createElement('pre')
+            element.innerHTML = 'Unrecognized input. Type `help` to see all commands.';
+            results[0].appendChild(element)
+          }
+
+          function handleHelp() {
+            var element = document.createElement('pre')
+            element.innerHTML = 'help clear ls cat cd';
+            results[0].appendChild(element)
+          }
+
+          function handleLol() {
+            var element = document.createElement('pre')
+            element.innerHTML = '( ͡° ͜ʖ ͡°)';
+            results[0].appendChild(element)
+          }
+
+          function handleCat(param) {
+            var element = document.createElement('p')
+            for (var prop in currentDirList) {
+              if (param === currentDirList[prop].name && currentDirList[prop].type === 'file') {
+                CommandService.sendCommand('cat', prop).then(function(data) {
+                  element.innerHTML = data.data.content
+                  results[0].appendChild(element)
+                });
+              }
+            }
+          }
+
+          // so angular :/
+          function handleClear() {
+            results[0].innerHTML = '';
+          }
+
+          function handleList(param) {
+            var element = document.createElement('pre');
+            if (!param) {
+              for (var prop in currentDirList) {
+                element.innerHTML += currentDirList[prop].name + ' ';
+                results[0].appendChild(element)
+              }
+            } else {
+              for (var prop in currentDirList) {
+                if (param === currentDirList[prop].name) {
+                  CommandService.sendCommand('ls', prop).then(function(data) {
+                    var data = data.data.items;
+
+                    for (var prop in data) {
+                      element.innerHTML += data[prop].name + ' ';
+                    }
+                    results[0].appendChild(element)
+
+                  }, function errorCallback(data) {
+                    element.innerHTML = data.data;
+                    results[0].appendChild(element);
+                  });
+                }
+              }
             }
 
+          }
+
+
+          function handleCd(param) {
+            if (param) {
+              for (var prop in currentDirList) {
+                if (param === currentDirList[prop].name && currentDirList[prop].type === 'folder') {
+                  scope.currentDirName += '/' + param;
+                  scope.currentDirIndex = prop
+                  scope.$apply();
+
+                  CommandService.sendCommand('ls', prop).then(function(data) {
+                    currentDirList = data.data.items
+
+                    // handleList();
+                  })
+                }
+              }
+            }
+            if (!param || param === '..') {
+              scope.currentDirName = '/home'
+              scope.currentDirIndex = 0
+              scope.$apply();
+              CommandService.sendCommand('ls', scope.currentDirIndex).then(function(data) {
+                currentDirList = data.data.items
+              });
+            }
 
           }
 
@@ -78,27 +194,28 @@ pipboy.directive('terminal', function(CommandService) {
 
 
           input.on('keydown', function(e) {
+            var div = document.getElementById('pipboy');
+
 
             if (e.keyCode === 13) {
 
+              var commandObj = commandParser(scope.commandLine)
               var commandTyped = document.createElement('pre');
-              var commandResult = document.createElement('pre');
 
               commandTyped.innerHTML = scope.commandLine;
-              commandResult.innerHTML = 'root home js';
-
-              results[0].appendChild(commandResult)
               results[0].appendChild(commandTyped)
 
-              var a = commandParser(scope.commandLine);
-
-              console.log(a);
+              commandHanlder(commandObj.command, commandObj.param)
 
               commandHistory.push(scope.commandLine);
 
-              scope.commandLine = '';
 
+
+              scope.commandLine = '';
               scope.$apply();
+                 div.scrollTop = div.scrollHeight - div.clientHeight;
+
+              // terminalWindow[0].scrollTop = terminalWindow[0].scrollHeight;
             }
 
             if (e.keyCode === 38) {
@@ -108,6 +225,11 @@ pipboy.directive('terminal', function(CommandService) {
 
             if (e.keyCode === 40) {
               nextCommand();
+            }
+
+            if (e.keyCode === 9) {
+              e.preventDefault();
+              // TODO: autocomplete
             }
           });
 

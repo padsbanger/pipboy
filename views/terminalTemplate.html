@@ -1,8 +1,5 @@
 <div class='terminal-main'>
-  <div class='terminal-viewport'>
-    <div class='terminal-results'></div>
-    <span class="terminal-logo">[~]</span>
-    <span class="terminal-user">$</span>
-    <input type='text' ng-model='commandLine' class='terminal-target' autofocus required />
-  </div>
+  <div class='terminal-results'></div>
+  <span class="terminal-prompt">{{prompt + ' '+ currentDirName}}</span>
+  <input type='text' ng-model='commandLine' class='terminal-target' autofocus required />
 </div>
