@@ -15,7 +15,7 @@ pipboy.factory('CommandService', [ '$http',
       sendAutoComplete: function(folder, query) {
         return $http({
           method: 'GET',
-          url: api+'/autocomplete/'+folder + ''+query
+          url: api+'/autocomplete/'+folder + '/'+query
         })
       }
     };

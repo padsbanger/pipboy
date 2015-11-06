@@ -6,9 +6,10 @@ body {
   font-family: @font-family;
   font-weight: bold;
   color: @terminal-green;
+  background: black;
 }
 
-#pipboy {
+.terminal-main {
   overflow: auto;
   width: 650px;
   height: 400px;
@@ -27,6 +28,10 @@ body {
   .terminal-user {
     color: @violent-red;
   }
+  pre {
+    display: block;
+    overflow: hidden;
+  }
   input {
     color: @terminal-green;
     background: none;
@@ -40,8 +45,8 @@ body {
 
 
 .css-typing {
-  width: 500px;
-  white-space: nowrap;
+  display: block;
+  width: 650px;
   overflow: hidden;
   -webkit-animation: type 2s steps(50, end);
   animation: type 2s steps(50, end);

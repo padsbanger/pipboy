@@ -12,13 +12,13 @@ pipboy.directive('terminal', function(CommandService) {
         post: function postLink(scope, element, attrs, controller) {
 
           scope.prompt = '[~]$'
-          scope.currentDirName = '~/home'
+          scope.currentDirName = '/home'
           scope.currentDirIndex = 0
-
 
           var terminalWindow = element;
           var input = angular.element(terminalWindow[0].querySelector('input[type="text"]'))
           var results = angular.element(terminalWindow[0].querySelector('.terminal-results'))
+          var line = '';
 
           var commandHistory = [];
           var commandIndex = -1;
@@ -56,81 +56,122 @@ pipboy.directive('terminal', function(CommandService) {
                 handleCd(param);
                 break;
 
+              case 'pwd':
+                handlePwd();
+                break;
+
+              case 'exit':
+                handleExit();
+                break;
+
               default:
                 handleDefault();
             }
           }
 
           function start() {
-            var element = document.createElement('pre')
-            element.innerHTML = 'Welcome to your very own Pip-Boy 3000 ! <br/>Type `help` to see avaiable commands.  <br/>Use arrow keys to toggle between already inputed commands.';
-            // console.log(element)
-            element.className = 'css-typing';
-            results[0].appendChild(element)
+            line = 'Welcome to your very own Pip-Boy 3000 ! <br/>Type `help` to see avaiable commands.  <br/>Use arrow keys to toggle between already inputed commands.';
+
+            drawLine(line)
+          }
+
+          function handleAutoComplete(query) {
+            CommandService.sendAutoComplete(scope.currentDirIndex, query).then(function(data) {
+              var data = data.data.items;
+              var autocomplete = '';
+              if (Object.keys(data).length) {
+                for (var prop in data) {
+                  // I want only first result, because.... give me a break;
+                  autocomplete = data[prop].name
+                  break;
+                }
+                scope.commandLine = commandParser(scope.commandLine).command + ' ' + autocomplete
+              }
+
+            })
+            scope.$apply();
+          }
+
+          function drawLine(text, file) {
+            line = '';
+            var element = {}
+            if (text) {
+              if (!file) {
+                element = document.createElement('pre');
+                element.className = 'css-typing';
+              } else {
+                element = document.createElement('div');
+              }
+              element.innerHTML = text;
+              results[0].appendChild(element)
+            }
+
+            var terminal = document.querySelector('.terminal-main');
+            terminal.scrollTop = terminal.scrollHeight;
 
           }
 
+
           function handleDefault() {
-            var element = document.createElement('pre')
-            element.innerHTML = 'Unrecognized input. Type `help` to see all commands.';
-            element.className = 'css-typing';
-            results[0].appendChild(element)
+            line = 'Unrecognized input. Type `help` to see all commands.';
+            drawLine(line);
           }
 
           function handleHelp() {
-            var element = document.createElement('pre')
-            element.innerHTML = 'help clear ls cat cd';
-            element.className = 'css-typing';
-            results[0].appendChild(element)
+            line = 'help clear ls cat cd pwd exit';
+            drawLine(line)
+          }
+
+          function handleExit() {
+            // try to unit tests this, lol
+            if (confirm('You sure ? ( ͡° ͜ʖ ͡°)')) {
+              window.close();
+            }
           }
 
           function handleLol() {
-            var element = document.createElement('pre')
-            element.innerHTML = '( ͡° ͜ʖ ͡°)';
-            element.className = 'css-typing';
-            results[0].appendChild(element)
+            line = '( ͡° ͜ʖ ͡°)';
+            drawLine(line);
+          }
+
+          function handlePwd() {
+            line = 'Currently in: ' + scope.currentDirName;
+            drawLine(line)
           }
 
           function handleCat(param) {
-            var element = document.createElement('pre')
             for (var prop in currentDirList) {
               if (param === currentDirList[prop].name && currentDirList[prop].type === 'file') {
                 CommandService.sendCommand('cat', prop).then(function(data) {
-                  element.innerHTML = data.data.content
-                  results[0].appendChild(element)
+                  drawLine(data.data.content, true)
                 });
               }
             }
           }
 
-          // so angular :/
+          // so angular-way :/
           function handleClear() {
             results[0].innerHTML = '';
           }
 
           function handleList(param) {
-            var element = document.createElement('pre');
+
             if (!param) {
               for (var prop in currentDirList) {
-                element.innerHTML += currentDirList[prop].name + ' ';
-                element.className = 'css-typing';
-                results[0].appendChild(element)
+                line += currentDirList[prop].name + ' ';
               }
+              drawLine(line);
             } else {
               for (var prop in currentDirList) {
                 if (param === currentDirList[prop].name) {
                   CommandService.sendCommand('ls', prop).then(function(data) {
                     var data = data.data.items;
-
                     for (var prop in data) {
-                      element.innerHTML += data[prop].name + ' ';
+                      line += data[prop].name + ' ';
                     }
-                    results[0].appendChild(element)
-
+                    drawLine(line)
                   }, function errorCallback(data) {
-                    element.innerHTML = data.data;
-                    element.className = 'css-typing';
-                    results[0].appendChild(element);
+                    drawLine(data.data)
                   });
                 }
               }
@@ -149,8 +190,6 @@ pipboy.directive('terminal', function(CommandService) {
 
                   CommandService.sendCommand('ls', prop).then(function(data) {
                     currentDirList = data.data.items
-
-                    // handleList();
                   })
                 }
               }
@@ -201,29 +240,19 @@ pipboy.directive('terminal', function(CommandService) {
 
 
           input.on('keydown', function(e) {
-            var div = document.getElementById('pipboy');
-
-
             if (e.keyCode === 13) {
 
               var commandObj = commandParser(scope.commandLine)
-              var commandTyped = document.createElement('pre');
 
-              commandTyped.innerHTML = scope.commandLine;
-              commandTyped.className = 'css-typing';
-              results[0].appendChild(commandTyped)
+              var fullCommandToPrint = scope.prompt + ' ' + scope.currentDirName + ' ' + scope.commandLine
 
+              drawLine(fullCommandToPrint)
               commandHanlder(commandObj.command, commandObj.param)
-
               commandHistory.push(scope.commandLine);
 
-
-
               scope.commandLine = '';
-              scope.$apply();
-                 div.scrollTop = div.scrollHeight - div.clientHeight;
 
-              // terminalWindow[0].scrollTop = terminalWindow[0].scrollHeight;
+              scope.$apply();
             }
 
             if (e.keyCode === 38) {
@@ -237,7 +266,11 @@ pipboy.directive('terminal', function(CommandService) {
 
             if (e.keyCode === 9) {
               e.preventDefault();
-              // TODO: autocomplete
+
+              var query = commandParser(scope.commandLine).param
+              if (query) {
+                handleAutoComplete(query)
+              }
             }
           });
 
