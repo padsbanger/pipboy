@@ -5,7 +5,7 @@ pipboy.directive('terminal', function(CommandService) {
     restirct: "E",
     controller: 'terminalCtrl',
     replace: true,
-    templateUrl: '/views/terminalTemplate.html',
+    templateUrl: 'views/terminalTemplate.html',
     compile: function compile() {
       return {
         pre: function preLink() {},
@@ -14,18 +14,20 @@ pipboy.directive('terminal', function(CommandService) {
           scope.prompt = '[~]$'
           scope.currentDirName = '/home'
           scope.currentDirIndex = 0
+          scope.commandLine = ''
 
           var terminalWindow = element;
+          var terminal = document.querySelector('.terminal-main');
           var input = angular.element(terminalWindow[0].querySelector('input[type="text"]'))
           var results = angular.element(terminalWindow[0].querySelector('.terminal-results'))
           var line = '';
 
-          var commandHistory = [];
-          var commandIndex = -1;
-          var currentDirList = {};
+          scope.commandHistory = [];
+          scope.commandIndex = -1;
+          scope.currentDirList = {};
 
           CommandService.sendCommand('ls', scope.currentDirIndex).then(function(data) {
-            currentDirList = data.data.items
+            scope.currentDirList = data.data.items
             start();
           });
 
@@ -81,34 +83,30 @@ pipboy.directive('terminal', function(CommandService) {
               var autocomplete = '';
               if (Object.keys(data).length) {
                 for (var prop in data) {
-                  // I want only first result, because.... give me a break;
+                  // I want only first result, since server never returns more, even if i ask nicely
                   autocomplete = data[prop].name
                   break;
                 }
+
                 scope.commandLine = commandParser(scope.commandLine).command + ' ' + autocomplete
               }
 
             })
-            scope.$apply();
           }
 
           function drawLine(text, file) {
             line = '';
             var element = {}
             if (text) {
+              element = document.createElement('pre');
               if (!file) {
-                element = document.createElement('pre');
                 element.className = 'css-typing';
-              } else {
-                element = document.createElement('div');
-              }
+              } else {}
               element.innerHTML = text;
               results[0].appendChild(element)
             }
 
-            var terminal = document.querySelector('.terminal-main');
-            terminal.scrollTop = terminal.scrollHeight;
-
+            terminalWindow[0].scrollTop = terminalWindow[0].scrollHeight;
           }
 
 
@@ -140,8 +138,8 @@ pipboy.directive('terminal', function(CommandService) {
           }
 
           function handleCat(param) {
-            for (var prop in currentDirList) {
-              if (param === currentDirList[prop].name && currentDirList[prop].type === 'file') {
+            for (var prop in scope.currentDirList) {
+              if (param === scope.currentDirList[prop].name && scope.currentDirList[prop].type === 'file') {
                 CommandService.sendCommand('cat', prop).then(function(data) {
                   drawLine(data.data.content, true)
                 });
@@ -157,13 +155,13 @@ pipboy.directive('terminal', function(CommandService) {
           function handleList(param) {
 
             if (!param) {
-              for (var prop in currentDirList) {
-                line += currentDirList[prop].name + ' ';
+              for (var prop in scope.currentDirList) {
+                line += scope.currentDirList[prop].name + ' ';
               }
               drawLine(line);
             } else {
-              for (var prop in currentDirList) {
-                if (param === currentDirList[prop].name) {
+              for (var prop in scope.currentDirList) {
+                if (param === scope.currentDirList[prop].name) {
                   CommandService.sendCommand('ls', prop).then(function(data) {
                     var data = data.data.items;
                     for (var prop in data) {
@@ -182,51 +180,49 @@ pipboy.directive('terminal', function(CommandService) {
 
           function handleCd(param) {
             if (param) {
-              for (var prop in currentDirList) {
-                if (param === currentDirList[prop].name && currentDirList[prop].type === 'folder') {
+              for (var prop in scope.currentDirList) {
+                if (param === scope.currentDirList[prop].name && scope.currentDirList[prop].type === 'folder') {
                   scope.currentDirName += '/' + param;
                   scope.currentDirIndex = prop
-                  scope.$apply();
 
                   CommandService.sendCommand('ls', prop).then(function(data) {
-                    currentDirList = data.data.items
+                    scope.currentDirList = data.data.items
                   })
+                  break;
                 }
               }
             }
             if (!param || param === '..') {
               scope.currentDirName = '/home'
               scope.currentDirIndex = 0
-              scope.$apply();
+
               CommandService.sendCommand('ls', scope.currentDirIndex).then(function(data) {
-                currentDirList = data.data.items
+                scope.currentDirList = data.data.items
               });
             }
 
           }
 
           function nextCommand() {
-            if (commandIndex === -1) {
+            if (scope.commandIndex === -1) {
               return;
             }
 
-            if (commandIndex < commandHistory.length - 1) {
-              scope.commandLine = commandHistory[++commandIndex];
+            if (scope.commandIndex < scope.commandHistory.length - 1) {
+              scope.commandLine = scope.commandHistory[++scope.commandIndex];
               scope.$apply();
             } else {
               scope.commandLine = '';
-              scope.$apply();
             }
           }
 
           function previousCommand() {
-            if (commandIndex === -1) {
-              commandIndex = commandHistory.length;
+            if (scope.commandIndex === -1) {
+              scope.commandIndex = scope.commandHistory.length;
             }
-            commandIndex--;
+            scope.commandIndex--;
 
-            scope.commandLine = commandHistory[commandIndex];
-            scope.$apply();
+            scope.commandLine = scope.commandHistory[scope.commandIndex];
           }
 
           function commandParser(commandString) {
@@ -238,42 +234,40 @@ pipboy.directive('terminal', function(CommandService) {
             }
           }
 
+          scope.inputActions = function($event) {
 
-          input.on('keydown', function(e) {
-            if (e.keyCode === 13) {
-
-              var commandObj = commandParser(scope.commandLine)
-
-              var fullCommandToPrint = scope.prompt + ' ' + scope.currentDirName + ' ' + scope.commandLine
-
-              drawLine(fullCommandToPrint)
-              commandHanlder(commandObj.command, commandObj.param)
-              commandHistory.push(scope.commandLine);
-
-              scope.commandLine = '';
-
-              scope.$apply();
-            }
-
-            if (e.keyCode === 38) {
+            if ($event.keyCode === 38) {
               previousCommand();
 
             }
 
-            if (e.keyCode === 40) {
+            if ($event.keyCode === 40) {
               nextCommand();
             }
 
-            if (e.keyCode === 9) {
-              e.preventDefault();
+            if ($event.keyCode === 9) {
+              $event.preventDefault();
 
               var query = commandParser(scope.commandLine).param
               if (query) {
                 handleAutoComplete(query)
               }
             }
-          });
 
+          }
+
+
+          scope.execute = function() {
+            var commandObj = commandParser(scope.commandLine)
+
+            var fullCommandToPrint = scope.prompt + ' ' + scope.currentDirName + ' ' + scope.commandLine
+
+            drawLine(fullCommandToPrint)
+            commandHanlder(commandObj.command, commandObj.param)
+            scope.commandHistory.push(scope.commandLine);
+
+            scope.commandLine = '';
+          }
         }
       }
     }
