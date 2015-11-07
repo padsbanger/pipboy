@@ -143,7 +143,7 @@ module.exports = function(grunt) {
     karma: {
       unit: {
         configFile: 'karma.conf.js',
-        singleRun: false
+        singleRun: true
       }
     },
 
@@ -154,6 +154,15 @@ module.exports = function(grunt) {
         }
       }
     },
+    coveralls: {
+      options: {
+        debug: true,
+        coverage_dir: 'test-coverage',
+        dryRun: false,
+        force: true,
+        recursive: true
+      }
+    }
 
   });
 
