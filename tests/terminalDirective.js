@@ -13,26 +13,7 @@ describe('Terminal directive', function() {
     template = $templateCache.get('views/terminalTemplate.html');
     $templateCache.put('views/terminalTemplate.html', template);
 
-    folderMock = {
-      "items": {
-        "1": {
-          "name": "js",
-          "type": "folder"
-        },
-        "2": {
-          "name": "html",
-          "type": "folder"
-        },
-        "3": {
-          "name": "package.json",
-          "type": "file"
-        },
-        "4": {
-          "name": "about.txt",
-          "type": "file"
-        }
-      }
-    }
+    folderMock = {"items":{"1":{"name":"js","type":"folder"},"2":{"name":"html","type":"folder"},"3":{"name":"package.json","type":"file"},"4":{"name":"about.txt","type":"file"}}}
 
     fileMock = {
       "content": "{\n  \"name\": \"fs-front-end-project\",\n  \"private\": true,\n  \"version\": \"0.0.1\",\n  \"dependencies\": {\n    \"express\"     : \"~4.9.0\",\n    \"body-parser\" : \"~1.9.0\",\n    \"cors\"        : \"2.7.1\"\n  }\n}"
@@ -40,9 +21,6 @@ describe('Terminal directive', function() {
 
     $httpBackend.when('GET', 'http://localhost:8080/api/ls/0').respond(folderMock);
     $httpBackend.when('GET', 'http://localhost:8080/api/cat/3').respond(fileMock);
-    $httpBackend.when('GET', 'http://localhost:8080/api/cd/1').respond(fileMock);
-
-
 
     element = $compile('<terminal></terminal>')(scope);
 
@@ -99,21 +77,59 @@ describe('Terminal directive', function() {
     expect(result.innerHTML).toBe(undefined)
   })
 
-  it('should have command cd to enter folder', function() {
-    scope.commandLine = 'cat package.json'
+  it('should command history working', function() {
+    scope.commandLine = 'ls'
     scope.execute()
 
-    scope.$apply()
-    scope.$digest();
+    scope.commandLine = 'help'
+    scope.execute()
 
-    console.log(scope.currentDirName)
+    scope.commandLine = 'clear'
+    scope.execute()
 
-    var result = element
+    scope.previousCommand();
+    scope.previousCommand();
 
+    expect(scope.commandHistory[0]).toBe('ls')
+    expect(scope.commandIndex).toBe(1)
 
-    console.log(result)
-    // expect(result.innerHTML).toBe(undefined)
+    scope.nextCommand();
+
+    expect(scope.commandIndex).toBe(2)
   })
 
+  it('should show current dir user is in', function() {
+    scope.commandLine = 'pwd'
+    scope.execute()
+    scope.$apply()
 
+    var result = element.find('pre')[1]
+
+    expect(result.innerHTML).toContain('Currently in: /home')
+  })
+
+  it('should trigger previousCommand if up key is pressed', function() {
+    spyOn(scope, 'previousCommand');
+
+    var eventObj = {keyCode: 38}
+
+    scope.inputActions(eventObj)
+    expect(scope.previousCommand).toHaveBeenCalled();
+  })
+
+  it('should trigger nextCommand if up down is pressed', function() {
+    spyOn(scope, 'nextCommand');
+
+    var eventObj = {keyCode: 40}
+
+    scope.inputActions(eventObj)
+    expect(scope.nextCommand).toHaveBeenCalled();
+  })
+
+  it('should have cd command work without params', function() {
+    scope.handleCd('..');
+    expect(scope.currentDirName).toBe('/home')
+    scope.handleCd();
+    expect(scope.currentDirName).toBe('/home')
+  })
 })
